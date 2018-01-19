@@ -52,15 +52,17 @@ public class ChatWorker implements Runnable {
                     }
                     else if(request.startsWith("/whisper")) {
                         try {
-//                            System.out.print("ini adalah dari whisper");
                             String[] command = request.split(" ");
                             String targetuser = command[1];
+                            if(targetuser.equals("")) {
+                                throw new ArrayIndexOutOfBoundsException();
+                            }
                             String pesan = String.join(" ", Arrays.copyOfRange(command, 2, command.length));
                             if(targetuser != "" || targetuser != null) {
-                                whisper(pesan, targetuser);
+                                whisper(String.format("%s: %s", "Whisper "+this.name, pesan), targetuser);
                             }
                         } catch(ArrayIndexOutOfBoundsException e) {
-                            addMessage("Wrong command please try again");
+                            addMessage("Please input the username");
                         }
                     } else {
                         switch (request) {
@@ -118,19 +120,8 @@ public class ChatWorker implements Runnable {
     }
     
     public void whisper(final String message, String targetuser) {
-        System.out.println("hello dari whisper luar");
         synchronized(workers) {
-            System.out.println("hello dari whisper tengah");
-            workers.stream().forEach(worker -> {
-                if(worker.name == targetuser) {
-                    System.out.println("Sama");
-                } else {
-                System.out.println(targetuser);
-                System.out.println(worker.name.toString());
-                }
-            });
-            workers.stream().filter(x-> x.name == targetuser).forEach(worker -> {
-                System.out.println("hello dari whisper dalam");
+            workers.stream().filter(x-> x.name.equals(targetuser)).forEach(worker -> {
                 worker.addMessage(String.format(message));
             });
         }
